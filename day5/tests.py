@@ -1,6 +1,8 @@
 import unittest
 
-from first import line_of_text_to_coordinates, read_file, Line, create_empty_diagram, apply_line_to_diagram, count_intersections
+from first import line_of_text_to_coordinates, read_file, Line, create_empty_diagram, apply_line_to_diagram, count_intersections, is_horizontal_or_vertical
+from second import is_diagonal, apply_line_to_diagram_diagonally
+
 
 class TestDayFive(unittest.TestCase):
 
@@ -16,9 +18,9 @@ class TestDayFive(unittest.TestCase):
         text_line = '57,611 -> 57,221'
         coordinates = line_of_text_to_coordinates(text_line)
         self.assertEqual(coordinates.start_x, 57)
-        self.assertEqual(coordinates.start_y, 221)
+        self.assertEqual(coordinates.start_y, 611)
         self.assertEqual(coordinates.end_x, 57)
-        self.assertEqual(coordinates.end_y, 611)
+        self.assertEqual(coordinates.end_y, 221)
 
     def test_read_file_returns_list_of_line_coordinates(self):
         lines = read_file('test_input.txt')
@@ -46,12 +48,50 @@ class TestDayFive(unittest.TestCase):
         self.assertListEqual(apply_line_to_diagram(diagram, line),
                              [[1,0,0], [0,0,0], [0,0,0]])
 
-    def test_apply_line_to_diagram_returns_old_diagram_if_line_is_not_horizontal_or_vertical(self):
-        diagram = [[0,1,1], [0,0,0], [0,0,0]]
+    def test_is_horizontal_or_vertical_works(self):
+        line = Line(start_x = 1, start_y = 0, end_x = 2, end_y = 0)
+        self.assertTrue(is_horizontal_or_vertical(line))
+        line = Line(start_x = 0, start_y = 0, end_x = 0, end_y = 0)
+        self.assertTrue(is_horizontal_or_vertical(line))
         line = Line(start_x = 0, start_y = 0, end_x = 1, end_y = 2)
-        self.assertListEqual(apply_line_to_diagram(diagram, line),
-                             [[0,1,1], [0,0,0], [0,0,0]])
+        self.assertFalse(is_horizontal_or_vertical(line))
+
+    def test_is_diagonal_works_for_45_and_degrees_only(self):
+        line = Line(start_x = 0, start_y = 3, end_x = 2, end_y = 1)
+        self.assertTrue(is_diagonal(line))
+        line = Line(start_x = 2, start_y = 1, end_x = 0, end_y = 3)
+        self.assertTrue(is_diagonal(line))
+        line = Line(start_x = 1, start_y = 0, end_x = 3, end_y = 2)
+        self.assertTrue(is_diagonal(line))
+        line = Line(start_x = 3, start_y = 2, end_x = 1, end_y = 0)
+        self.assertTrue(is_diagonal(line))
+        line = Line(start_x = 1, start_y = 0, end_x = 2, end_y = 0)
+        self.assertFalse(is_diagonal(line))
+        line = Line(start_x = 0, start_y = 0, end_x = 0, end_y = 0)
+        self.assertFalse(is_diagonal(line))
+        line = Line(start_x = 0, start_y = 0, end_x = 1, end_y = 2)
+        self.assertFalse(is_diagonal(line))
 
     def test_it_finds_intersections_of_two_or_more_lines(self):
         diagram = [[1,2,1],[0,2,0],[0,0,0]]
         self.assertEqual(count_intersections(diagram), 2)
+
+    def test_lines_are_applied_diagonally_case_3(self):
+        diagram = [[0,0,0], [0,0,0], [0,0,0]]
+        line = Line(start_x = 0, start_y = 0, end_x = 2, end_y = 2)
+        self.assertListEqual([[1,0,0], [0,1,0], [0,0,1]], apply_line_to_diagram_diagonally(diagram, line))
+
+    def test_lines_are_applied_diagonally_case_4(self):
+        diagram = [[0,0,0], [0,0,0], [0,0,0]]
+        line = Line(start_x = 2, start_y = 2, end_x = 0, end_y = 0)
+        self.assertListEqual([[1,0,0], [0,1,0], [0,0,1]], apply_line_to_diagram_diagonally(diagram, line))
+
+    def test_lines_are_applied_diagonally_case_1(self):
+        diagram = [[0,0,0], [0,0,0], [0,0,0]]
+        line = Line(start_x = 1, start_y = 1, end_x = 2, end_y = 0)
+        self.assertListEqual([[0,0,1], [0,1,0], [0,0,0]], apply_line_to_diagram_diagonally(diagram, line))
+
+    def test_lines_are_applied_diagonally_case_2(self):
+        diagram = [[0,0,0], [0,0,0], [0,0,0]]
+        line = Line(start_x = 2, start_y = 0, end_x = 1, end_y = 1)
+        self.assertListEqual([[0,0,1], [0,1,0], [0,0,0]], apply_line_to_diagram_diagonally(diagram, line))
